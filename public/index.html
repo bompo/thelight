@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+
+<!--
+Copyright (c) 2011 Stefan Wagner, Brandon Jones
+
+This software is provided 'as-is', without any express or implied
+warranty. In no event will the authors be held liable for any damages
+arising from the use of this software.
+
+Permission is granted to anyone to use this software for any purpose,
+including commercial applications, and to alter it and redistribute it
+freely, subject to the following restrictions:
+
+   1. The origin of this software must not be misrepresented; you must not
+   claim that you wrote the original software. If you use this software
+   in a product, an acknowledgment in the product documentation would be
+   appreciated but is not required.
+
+   2. Altered source versions must be plainly marked as such, and must not
+   be misrepresented as being the original software.
+
+   3. This notice may not be removed or altered from any source
+   distribution.
+-->
+
+<html>
+    <head>
+        <title>The Light - WebGL Game</title>
+
+        <script src="js/util/require.js" data-main="js/index"></script>
+
+        <link href="css/index.css" rel="stylesheet" type="text/css" />
+    </head>
+    <body>
+        <div id="game-frame">
+            <canvas id="game-canvas"></canvas>
+            <button id="fullscreen">Fullscreen</button>
+        </div>
+        <div id="text-frame">
+            <p id="loading">Loading Sound, please wait...</p>
+            <br/><br/><br/>
+            <p>
+                Reach the Light, avoid the enemies
+            </p>
+            <p>
+            Controls:
+                <ul>
+                <li>W/UP    -- move player up</li>
+                <li>S/DOWN  -- move player down</li>
+                <li>A/LEFT  -- move player left</li>
+                <li>D/RIGHT -- move player right</li>
+                </ul>
+            </p>
+            <p>WebGL game using Web Audio API/ HTML5 Audio, Fullscreen API (Chrome)</p> 
+            <p>
+            Credits:
+            <ul>           
+            <li>WebGL code: <a href="http://bompo-blog.appspot.com/">bompo</a></li>
+            <li>idea, music, Java code: <a href="http://bitbof.com/">bitbof</a></li>
+            <li>boilerplate code: <a href="http://blog.tojicode.com/">tojiro</a></li>
+        </div>
+            
+    </body>
+</html>
