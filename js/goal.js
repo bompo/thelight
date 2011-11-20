@@ -67,7 +67,7 @@ define([
             mat4.translate(mv, [this.position[0], this.position[1], 0]);
             mat4.rotate(mv, angle, [0,0,1]);
             mat4.scale(mv, [100000,0.05*this.distance,0]);      
-            quadModel.draw(gl, mv, [0.0, col, col, 1.0]);
+            quadModel.draw(gl, mv, col);
 		}
 
 		for(var i = 0; i < lines; i++) {
@@ -78,13 +78,13 @@ define([
             mat4.translate(mv, [this.position[0], this.position[1], 0]);
             mat4.rotate(mv, angle, [0,0,1]);
             mat4.scale(mv, [100000,0.05*this.distance,0]);      
-            quadModel.draw(gl, mv, [0.0, col, col, 1.0]);
+            quadModel.draw(gl, mv, col);
 		}
 
         mat4.identity(mv);
         mat4.translate(mv, [this.position[0], this.position[1], 0]);
         mat4.scale(mv, [this.size,this.size,0]);      
-        quadModel.draw(gl, mv,  [0.0, 0.8, 0.8, 1.0]);
+        quadModel.draw(gl, mv,  1);
     };
 
     return {

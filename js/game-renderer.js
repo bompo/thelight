@@ -23,6 +23,7 @@
 
 define([
     "camera",
+    "background",
     "player",
     "floater",
     "enemy",
@@ -32,7 +33,7 @@ define([
     "webkitaudio",
     "util/gl-util",
     "js/util/gl-matrix.js",
-], function(camera, player, floater, enemy, goal, quadModel, html5audio, webkitaudio, glUtil) {
+], function(camera, background, player, floater, enemy, goal, quadModel, html5audio, webkitaudio, glUtil) {
 
     "use strict";
       
@@ -51,9 +52,12 @@ define([
         this.quadModel = new quadModel.QuadModel();
         this.quadModel.load(gl);
 
+        this.background = new background.Background(gl, canvas);
+
         this.player = new player.Player(gl, canvas);
         this.goal = new goal.Goal(gl);
         this.floaters = [];
+        this.swipe = [];
         this.enemies = [];
         this.camera = new camera.GameCamera(canvas);
         this.win = false;
@@ -78,7 +82,7 @@ define([
 
     GameRenderer.prototype.drawFrame = function (gl, timing) { 
         if(this.win) {
-            gl.clearColor(0.0, 0.8, 0.8, 1.0);
+            gl.clearColor(0.6,0.8,1.0, 1.0);
             gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
             return;
         }
@@ -93,9 +97,12 @@ define([
 
         var viewMat = this.camera.getViewMat();
         var projectionMat = this.projectionMat;
-        
+
         //bind Model
         this.quadModel.bind(gl, viewMat, projectionMat);
+        
+        //draw background
+        this.background.draw(gl, this.quadModel);
         
         //draw goal
         this.goal.draw(gl, this.quadModel);
@@ -112,6 +119,12 @@ define([
 	        this.enemies[i].draw(gl, this.quadModel);
         }
  
+        //draw swipe
+        var len=this.swipe.length;
+        for(var i=0; i<len; i++) {
+	        this.swipe[i].draw(gl, this.quadModel);
+        }
+ 
         //draw player
         this.player.draw(gl, this.quadModel);
 
@@ -121,7 +134,7 @@ define([
         this.audio.update(this.goal.distance);        
 
         this.player.update();
-        this.goal.update();
+        this.goal.update();  
 
         //calc distance to goal
         var x_d = this.goal.position[0]/10 - this.player.getPosition()[0];
@@ -131,6 +144,17 @@ define([
 		    this.youWin();
 		    return;
 		}
+		
+		//update camera
+        var mix = 0.96;
+        var camPosition = vec3.create();        
+		camPosition[0] = this.camera.getPosition()[0]*mix - this.player.getPosition()[0]*10*(1-mix);
+		camPosition[1] = this.camera.getPosition()[1]*mix - this.player.getPosition()[1]*10*(1-mix);      
+        this.camera.setPosition(camPosition);
+        
+        //update background
+        this.background.setPosition(camPosition);   
+        this.background.alpha =0.4 - ((this.goal.distance/10000)/4);  
 		
 		//check collision with enemy
 		var len=this.enemies.length;
@@ -145,11 +169,11 @@ define([
         }        
         
         //player swipe
-        if(Math.random() > 0.7) {
+        if(Math.random() > 0.5 && (Math.abs(this.player.v[0])>5 || Math.abs(this.player.v[1])>5)) {
 			var position = vec3.create();
 			position[0] = ((this.player.getPosition()[0]));
 			position[1] = ((this.player.getPosition()[1]));
-            this.floaters.push(new floater.Floater(gl,position,10));
+            this.swipe.push(new floater.Floater(gl,position,10,50,50));
 		}        
 
         //add enemies
@@ -177,26 +201,29 @@ define([
         //add background floaters
         if(Math.random() > 0.9) {
 			var position = vec3.create();
-			position[0] = (this.player.getPosition()[0]/3+(Math.random()*this.canvas.width/32)-this.canvas.width/64);
-			position[1] = (this.player.getPosition()[1]/3+(Math.random()*this.canvas.height/32)-this.canvas.height/64);
-            this.floaters.push(new floater.Floater(gl,position,30));
+			position[0] = (this.player.getPosition()[0]/3+this.player.v[0]+(Math.random()*this.canvas.width/32)-this.canvas.width/64);
+			position[1] = (this.player.getPosition()[1]/3+this.player.v[1]+(Math.random()*this.canvas.height/32)-this.canvas.height/64);
+            this.floaters.push(new floater.Floater(gl,position,30,200,400));
 		}
 
         //update and cleanup floaters
         var len=this.floaters.length;
         for(var i=0; i<len; i++) {
 	        this.floaters[i].update();
+	        this.floaters[i].setOffsetPosition(camPosition);
         }
         if(len>0 && this.floaters[len-1].alive === false) {
            this.floaters.pop();
         }
-
-        //update camera
-        var mix = 0.96;
-        var camPosition = vec3.create();        
-		camPosition[0] = this.camera.getPosition()[0]*mix - this.player.getPosition()[0]*10*(1-mix);
-		camPosition[1] = this.camera.getPosition()[1]*mix - this.player.getPosition()[1]*10*(1-mix);      
-        this.camera.setPosition(camPosition);
+        
+        //update and cleanup swipe
+        var len=this.swipe.length;
+        for(var i=0; i<len; i++) {
+	        this.swipe[i].update();
+        }
+        if(len>0 && this.swipe[len-1].alive === false) {
+           this.swipe.pop();
+        }
 
     };
     

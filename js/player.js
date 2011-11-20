@@ -47,6 +47,8 @@ define([
         this._age = 0;   
         this._size = 10;   
         this._dirty = true;
+        this.delta = 0;
+        
         
         // Set up the appropriate event hooks
         window.addEventListener("keydown", function (event) {
@@ -73,8 +75,9 @@ define([
         if (this._dirty) {
             var mv = this._modelMat;
             mat4.identity(mv);
-            mat4.scale(mv, [this._size,this._size,1]);
-            mat4.translate(mv, [this._position[0], this._position[1], 0]);
+            
+            mat4.translate(mv, [this._position[0]*this._size, this._position[1]*this._size, 0]);
+            mat4.scale(mv, [this._size+(Math.sin(this.delta)*2),this._size+(Math.sin(this.delta)*2),1]);
             this._dirty = false;
         }
 
@@ -82,6 +85,11 @@ define([
     };
 
     Player.prototype.update  = function () {
+        this.delta += 0.01;
+        if(this.delta>3.15) {
+            this.delta = 0;
+        }
+    
         var dir = vec3.create(),
             speed = (this.speed/50),
             cam;        
@@ -117,7 +125,7 @@ define([
     };
 
     Player.prototype.draw  = function (gl, quadModel) {
-        quadModel.draw(gl, this.getModelMat(),  [1, 1, 1, 0.8]);
+        quadModel.draw(gl, this.getModelMat(),  1);
     };
 
     return {
