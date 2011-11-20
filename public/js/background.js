@@ -27,77 +27,54 @@ define([
 
     "use strict";
 
-    var Enemy;
+    var Background;
 
     /**
-     * Enemy who moves random
+     * Background who moves
      */
-    Enemy = function (gl,position) {
+    Background = function (gl,position,size) {
         var self = this;
 
-        this.position = position;
-        this._v = vec3.create();
-        this._a = vec3.create();
-        this.alive = true;   
-        this._age = 0;   
-        this._maxAge = 300;  
-        this.size = 10;   
-        this.alpha = 0;   
-        this._dirty = true;
+        this._position = position;
+        this._dirty = true;    
+        this._size = 1100;
+        this.alpha = 0.2;
 
         this._modelMat = mat4.create();
 
         return this;
     };
 
-    Enemy.prototype.getModelMat = function () {
+    Background.prototype.getModelMat = function () {
         if (this._dirty) {
             var mv = this._modelMat;
             mat4.identity(mv);
-
-            mat4.translate(mv, [this.position[0]*this.size, this.position[1]*this.size, 0]);
-            mat4.scale(mv, [this.size*this.alpha,this.size*this.alpha,0]);
+                 
+            mat4.translate(mv, [-this._position[0],-this._position[1], 0]);            
+            mat4.scale(mv, [this._size,this._size,0]);
+            
+//            mat4.translate(mv, [this._position[0], this._position[1], 0]);
+//            mat4.scale(mv, [this._size,this._size, 0]);
             this._dirty = false;
         }
 
         return this._modelMat;
     };
 
-    Enemy.prototype.update  = function () {
-        if(!this.alive) return;
-     
-        this._a[0] += (Math.random()-0.5);
-		this._a[1] += (Math.random()-0.5);
-		this._v[0] += this._a[0];
-		this._v[1] += this._a[1];
-		this.position[0] += this._v[0]/40;
-		this.position[1] += this._v[1]/40;
-		this._a[0] = 0;
-		this._a[1] = 0;
-		this._v[0] *= 0.95;
-		this._v[1] *= 0.95;
+    Background.prototype.getPosition = function () {
+        return this._position;
+    };
 
-        this._age+= 1;
-        if(this._age> this._maxAge) {
-            this.alive = false;
-        }
-
+    Background.prototype.setPosition = function (value) {
+        this._position = value;
         this._dirty = true;
     };
 
-    Enemy.prototype.draw  = function (gl, quadModel) {
-        if(!this.alive) return;
-
-		if(this._age < this._maxAge/2) {
-			this.alpha = this._age/(this._maxAge/2);
-		} else {
-			this.alpha = 1 - (this._age-this._maxAge/2)/(this._maxAge/2);
-		}
-
-        quadModel.draw(gl, this.getModelMat(), this.alpha, 1, 1);
+    Background.prototype.draw  = function (gl, quadModel) {
+        quadModel.draw(gl, this.getModelMat(), this.alpha, 2);
     };
 
     return {
-        Enemy: Enemy
+        Background: Background
     };
 });

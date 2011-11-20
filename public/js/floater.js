@@ -32,17 +32,20 @@ define([
     /**
      * Floater who moves
      */
-    Floater = function (gl,position,size) {
+    Floater = function (gl,position,size,speed,age) {
         var self = this;
 
         this._position = position;
+        this._offsetPosition = vec3.create();
         this._v = vec3.create();
         this._a = vec3.create();
         this.alive = true;   
         this._age = 0;   
-        this._maxAge = 200;  
-        this._size = size;   
-        this._dirty = true;
+        this._maxAge = age;  
+        this._maxAlpha = Math.random();  
+        this._size = size;
+        this._dirty = true;       
+        this._speed = speed;
 
         this._modelMat = mat4.create();
 
@@ -53,24 +56,31 @@ define([
         if (this._dirty) {
             var mv = this._modelMat;
             mat4.identity(mv);
-            mat4.scale(mv, [this._size,this._size,0]);
-            mat4.translate(mv, [this._position[0], this._position[1], 0]);
+            
+            //mat4.translate(mv, [((this._position[0]*this._size)+(this._offsetPosition[0]*this._maxAlpha)), ((this._position[1]*this._size)+(this._offsetPosition[1]*this._maxAlpha)), 0]);
+            mat4.translate(mv, [(((this._position[0]*this._size))), (((this._position[1]*this._size))), 0]);
+            mat4.scale(mv, [this._size*this._maxAlpha,this._size*this._maxAlpha,0]);
             this._dirty = false;
         }
 
         return this._modelMat;
     };
 
+    Floater.prototype.setOffsetPosition = function (value) {
+        this._offsetPosition = value;
+        this._dirty = true;
+    };
+
     Floater.prototype.update  = function () {
         if(!this.alive) return;
         var mix = 0.9;
      
-        this._a[0] = this._a[0]*mix + (Math.random()-0.5)*(1-mix)*8;
-		this._a[1] = this._a[1]*mix + (Math.random()-0.5)*(1-mix)*8;
+        this._a[0] = this._a[0]*mix + (Math.random()-0.5)*(1-mix)*(this._maxAlpha*10);
+		this._a[1] = this._a[1]*mix + (Math.random())*(1-mix)*(this._maxAlpha*4);
 		this._v[0] += this._a[0];
 		this._v[1] += this._a[1];
-		this._position[0] += this._v[0]/50;
-		this._position[1] += this._v[1]/50;
+		this._position[0] += this._v[0]/this._speed;
+		this._position[1] += this._v[1]/this._speed;
 		this._a[0] = 0;
 		this._a[1] = 0;
 		this._v[0] *= 0.95;
@@ -87,14 +97,17 @@ define([
     Floater.prototype.draw  = function (gl, quadModel) {
         if(!this.alive) return;
 
-        var alpha = 0;
+        this.alpha = 0;
 		if(this._age < this._maxAge/2) {
-			alpha = this._age/(this._maxAge/2);
+			this.alpha = this._age/(this._maxAge/2);
 		} else {
-			alpha = 1 - (this._age-this._maxAge/2)/(this._maxAge/2);
+			this.alpha = 1 - (this._age-this._maxAge/2)/(this._maxAge/2);
 		}
+		if(this._maxAlpha<this.alpha) {
+    		this.alpha = Math.min(this._maxAlpha,this.alpha);
+    	}
 
-        quadModel.draw(gl, this.getModelMat(), [0.05, 0.1, 0.1, alpha]);
+        quadModel.draw(gl, this.getModelMat(), this.alpha,3);
     };
 
     return {
