@@ -129,8 +129,8 @@ define(function() {
         createSolidTexture: function(gl, color) {
             var data = new Uint8Array(color);
             var texture = gl.createTexture();
-            gl.bindTexture(gl.TEXTURE_2D, texture);
-            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, 1, 1, 0, gl.RGB, gl.UNSIGNED_BYTE, data);
+            gl.bindTexture(gl.TEXTURE_2D, texture);           
+           	gl.texImage2D( gl.TEXTURE_2D, 0, gl.RGB, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, data );
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
             return texture;
@@ -141,7 +141,13 @@ define(function() {
             var image = new Image();
             image.addEventListener("load", function() {
                 gl.bindTexture(gl.TEXTURE_2D, texture);
-                gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+                
+                try { ext = gl.getExtension("OES_texture_float");
+	                gl.texImage2D( gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.FLOAT, image );
+                } catch(e) {
+	                gl.texImage2D( gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image );
+                }
+                
                 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
                 gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST);
                 gl.generateMipmap(gl.TEXTURE_2D);

@@ -84,7 +84,7 @@ define([
         mat4.identity(mv);
         mat4.translate(mv, [this.position[0], this.position[1], 0]);
         mat4.scale(mv, [this.size,this.size,0]);      
-        quadModel.draw(gl, mv,  1);
+        quadModel.draw(gl, mv,  1 , 0, 0, 1);
     };
 
     return {

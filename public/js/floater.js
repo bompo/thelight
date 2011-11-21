@@ -107,7 +107,7 @@ define([
     		this.alpha = Math.min(this._maxAlpha,this.alpha);
     	}
 
-        quadModel.draw(gl, this.getModelMat(), this.alpha,3);
+        quadModel.draw(gl, this.getModelMat(), this.alpha,3,0,1);
     };
 
     return {
