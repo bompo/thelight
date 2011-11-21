@@ -94,7 +94,7 @@ define([
 			this.alpha = 1 - (this._age-this._maxAge/2)/(this._maxAge/2);
 		}
 
-        quadModel.draw(gl, this.getModelMat(), this.alpha, 1, (Math.random()));
+        quadModel.drawParticle(gl, this.getModelMat(), this.alpha);
     };
 
     return {
