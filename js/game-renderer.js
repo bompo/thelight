@@ -77,7 +77,7 @@ define([
     GameRenderer.prototype.resize = function (gl, canvas) {
         gl.viewport(0, 0, canvas.width, canvas.height);
         this.canvas = canvas;
-        mat4.ortho(0, canvas.width,0,canvas.height, -1.0, 1.0, this.projectionMat);
+        mat4.ortho(0, canvas.width,0,canvas.height, -1, 1, this.projectionMat);
     };
 
     GameRenderer.prototype.drawFrame = function (gl, timing) { 
@@ -169,11 +169,11 @@ define([
         }        
         
         //player swipe
-        if(Math.random() > 0.5 && (Math.abs(this.player.v[0])>5 || Math.abs(this.player.v[1])>5)) {
+        if(Math.random() > 0.3 && (Math.abs(this.player.v[0])>5 || Math.abs(this.player.v[1])>5)) {
 			var position = vec3.create();
 			position[0] = ((this.player.getPosition()[0]));
 			position[1] = ((this.player.getPosition()[1]));
-            this.swipe.push(new floater.Floater(gl,position,10,50,50));
+            this.swipe.push(new floater.Floater(gl,position,10,100,100));
 		}        
 
         //add enemies

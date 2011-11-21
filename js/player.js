@@ -125,7 +125,7 @@ define([
     };
 
     Player.prototype.draw  = function (gl, quadModel) {
-        quadModel.draw(gl, this.getModelMat(),  1);
+        quadModel.draw(gl, this.getModelMat(),  1,0,0);
     };
 
     return {

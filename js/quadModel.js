@@ -54,16 +54,22 @@ define([
         "uniform float alpha;",
         "uniform float step;",
         "uniform float contrast;",
+        "uniform int blur;",
 
         "varying vec2 vTexture;",
 
-        "void main(void) {",    
+        "void main(void) {", 
+        " vec4 color;",
+        " if(blur == 1) {",   
         " vec4 sample0, sample1, sample2, sample3;",
         " sample0 = texture2D(diffuse, vec2(vTexture.x - step, vTexture.y - step));",
         " sample1 = texture2D(diffuse, vec2(vTexture.x + step, vTexture.y + step));",
         " sample2 = texture2D(diffuse, vec2(vTexture.x + step, vTexture.y - step));",
         " sample3 = texture2D(diffuse, vec2(vTexture.x - step, vTexture.y + step));",
-        " vec4 color = vec4((sample0.rgb + sample1.rgb + sample2.rgb + sample3.rgb) / 4.0,alpha);",
+        " color = vec4((sample0.rgb + sample1.rgb + sample2.rgb + sample3.rgb) / 4.0,alpha);",
+        " } else {",
+        " color = vec4(texture2D(diffuse, vec2(vTexture.x, vTexture.y)).rgb, alpha);",
+        " }",
         " color.rgb = (color.rgb - 0.5) / (1.0 - contrast) + 0.5;",
         " gl_FragColor = color;",
         "}"
@@ -120,21 +126,27 @@ define([
         if (!modelShader) {
             modelShader = glUtil.createShaderProgram(gl, modelVS, modelFS, 
                 ["position","texture"],
-                ["viewMat", "modelMat", "projectionMat", "diffuse", "alpha", "step", "contrast"]
+                ["viewMat", "modelMat", "projectionMat", "diffuse", "alpha", "step", "contrast","blur"]
             );
         }
         this.shader = modelShader;
     };
     
-    QuadModel.prototype.draw = function (gl, modelMat, alpha, textureSlot, contrast) 
-    {
+    QuadModel.prototype.draw = function (gl, modelMat, alpha, textureSlot, contrast, blur) {
+        if(blur!=null) {
+            gl.uniform1i(this.shader.uniform.blur, 1);
+        } else {
+            gl.uniform1i(this.shader.uniform.blur, 0);
+        }
+        gl.uniform1f(this.shader.uniform.step, ((1.0 - Math.min(0.6,Math.pow(alpha,1.5)))/10.0));
+        
         if(contrast!=null) {
             gl.uniform1f(this.shader.uniform.contrast, contrast);    
         } else {
             gl.uniform1f(this.shader.uniform.contrast, 0);  
         }
         gl.uniform1f(this.shader.uniform.alpha, alpha);
-        gl.uniform1f(this.shader.uniform.step, ((1.0 - Math.min(0.6,Math.pow(alpha,1.5)))/10.0));
+        
         gl.uniform1i(this.shader.uniform.diffuse, textureSlot);
         gl.uniformMatrix4fv(this.shader.uniform.modelMat, false, modelMat || identityMat);
         
