@@ -56,7 +56,7 @@ define([
             mat4.identity(mv);
 
             mat4.translate(mv, [this.position[0]*this.size, this.position[1]*this.size, 0]);
-            mat4.scale(mv, [this.size*this.alpha,this.size*this.alpha,0]);
+            mat4.scale(mv, [this.size*this.alpha*1.5,this.size*this.alpha*1.5,0]);
             this._dirty = false;
         }
 
@@ -85,7 +85,7 @@ define([
         this._dirty = true;
     };
 
-    Enemy.prototype.draw  = function (gl, quadModel) {
+    Enemy.prototype.draw  = function (gl, quadModel, playerModelMat) {
         if(!this.alive) return;
 
 		if(this._age < this._maxAge/2) {
@@ -94,7 +94,7 @@ define([
 			this.alpha = 1 - (this._age-this._maxAge/2)/(this._maxAge/2);
 		}
 
-        quadModel.drawParticle(gl, this.getModelMat(), this.alpha);
+        quadModel.draw(gl, this.getModelMat(), this.alpha, 1,0.5,1);
     };
 
     return {

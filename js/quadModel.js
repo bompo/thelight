@@ -75,37 +75,8 @@ define([
         "}"
     ].join("\n");
     
-    var particleVS = [ 
-        "attribute vec3 position;",
-        "uniform float size;",
-
-        "uniform mat4 viewMat;",
-        "uniform mat4 modelMat;",
-        "uniform mat4 projectionMat;",
-        
-        "void main(void) {",
-        " vec4 v = vec4(position, 1.0);",
-        " vec4 v1 = modelMat * v;",
-        " vec4 v2 = viewMat * v1;",
-        " vec4 v3 = projectionMat * v2;",
-        " gl_Position = v3;",
-        " gl_PointSize = size*400.0 + (1.5/length( v3.xyz ) );",
-        "}"
-    ].join("\n");
-
-    var particleFS = [
-        "uniform sampler2D diffuse;",
-
-        "void main(void) {", 
-        " gl_FragColor = vec4( vec3(1.0,0.0,0.0), 1.0 );",
-        " gl_FragColor = gl_FragColor * texture2D( diffuse, gl_PointCoord );", 
-        "}"
-    ].join("\n");
 
     var modelShader = null;
-    var particleShader = null;
-
-    
 
     var identityMat = mat4.create();
     mat4.identity(identityMat);
@@ -150,23 +121,14 @@ define([
         
         this.textures = [];
         this.textures[0] = glUtil.loadTexture(gl, "root/sprites/player.png");
-        this.textures[1] = glUtil.loadTexture(gl, "root/sprites/enemy.png");
+        this.textures[1] = glUtil.loadTexture(gl, "root/sprites/spark.png");
         this.textures[2] = glUtil.loadTexture(gl, "root/sprites/background.png");
         this.textures[3] = glUtil.loadTexture(gl, "root/sprites/floater.png");
-        this.textures[4] = glUtil.loadTexture(gl, "root/sprites/spark.png");
 
         if (!modelShader) {
             modelShader = glUtil.createShaderProgram(gl, modelVS, modelFS, 
                 ["position","texture"],
                 ["viewMat", "modelMat", "projectionMat", "diffuse", "alpha", "step", "contrast","blur"]
-            );
-        }
-        this.shader = modelShader;
-        
-        if (!particleShader) {
-            particleShader = glUtil.createShaderProgram(gl, particleVS, particleFS, 
-                ["position"],
-                ["viewMat", "modelMat", "projectionMat", "diffuse", "size"]
             );
         }
         this.shader = modelShader;
@@ -193,31 +155,9 @@ define([
         gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
     };
     
-    QuadModel.prototype.drawParticle = function (gl, modelMat, size) {
-        this.shader = particleShader; 
-        gl.useProgram(this.shader); 
-   
-        gl.uniform1f(this.shader.uniform.size, size/10);
-        
-        gl.uniform1i(this.shader.uniform.diffuse,4);
-        gl.uniformMatrix4fv(this.shader.uniform.viewMat, false, this.viewMat);
-        gl.uniformMatrix4fv(this.shader.uniform.projectionMat, false, this.projectionMat); 
-        gl.uniformMatrix4fv(this.shader.uniform.modelMat, false, modelMat || identityMat);
-        
-        gl.drawElements(gl.POINTS,2, gl.UNSIGNED_SHORT, 0);
-        
-        this.shader = modelShader;  
-        gl.useProgram(this.shader);
-    };
-    
     QuadModel.prototype.bind = function (gl, viewMat, projectionMat) {
         this.shader = modelShader;  
-        this.viewMat = viewMat;
-        this.projectionMat = projectionMat;
-        
-        gl.activeTexture(gl.TEXTURE4);
-        gl.bindTexture(gl.TEXTURE_2D, this.textures[4]);
-        
+                
         gl.activeTexture(gl.TEXTURE3);
         gl.bindTexture(gl.TEXTURE_2D, this.textures[3]);
         
@@ -235,9 +175,7 @@ define([
         gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer); 
         gl.enableVertexAttribArray(this.shader.attribute.position);        
         gl.vertexAttribPointer(this.shader.attribute.position, 3, gl.FLOAT, false, 0, 0);
-        gl.enableVertexAttribArray(particleShader.attribute.position);        
-        gl.vertexAttribPointer(particleShader.attribute.position, 3, gl.FLOAT, false, 0, 0);
-        
+                
         gl.bindBuffer(gl.ARRAY_BUFFER, this.texBuffer);        
         gl.enableVertexAttribArray(this.shader.attribute.texture);        
         gl.vertexAttribPointer(this.shader.attribute.texture, 2, gl.FLOAT, false, 0, 0);
